@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/CrumpetsNTea/tinyapp/issues"
   },
-  "homepage": "https://github.com/CrumpetsNTea/tinyapp#readme"
+  "homepage": "https://github.com/CrumpetsNTea/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
