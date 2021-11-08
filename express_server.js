@@ -9,6 +9,11 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.get('/urls', (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
+});
+
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
