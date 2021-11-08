@@ -37,6 +37,10 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL, //using the shortURL
     longURL: urlDatabase[req.params.shortURL] }; //looks up the corresponding longURL
+  if (urlDatabase[req.params.shortURL] === undefined) {
+    res.send("Invalid Short URL"); //then tells the user and they can go back and try again
+    console.log("User tried inputting invalid Short URL"); //lets server know too
+  } //otherwise things go ahead as per usual - it will pass if :shortURL exists in urldatabase and will continue correctly
   res.render("urls_show", templateVars); //passes both to urls_show template and then sends the HTML to the browser
 });
 
@@ -54,4 +58,10 @@ app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body (longURL) to the console
   res.redirect(`/urls/${newRandomShortURL}`);//redirects user to the newly generated shortURLs page
   console.log(urlDatabase); //logs the updated urlDatabase to the console
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  let short = req.params.shortURL;
+  let longURL = urlDatabase[short]; //if they click on the new shortURL
+  res.redirect(longURL); //then will redirect them to the website of the shortURL using shortURL as a key to access the value which is the longURL
 });
