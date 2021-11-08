@@ -14,6 +14,10 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
+app.get('/urls/new', (req, res) => {
+  res.render('urls_new');
+});
+
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
