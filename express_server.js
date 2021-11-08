@@ -24,32 +24,29 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
+app.get("/", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars); //takes user to MyURLs page if they just have a slash after the url
+});
+
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  res.render('urls_new'); //takes user to Create TinyURL page
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL] };
-  res.render("urls_show", templateVars);
+    shortURL: req.params.shortURL, //using the shortURL
+    longURL: urlDatabase[req.params.shortURL] }; //looks up the corresponding longURL
+  res.render("urls_show", templateVars); //passes both to urls_show template and then sends the HTML to the browser
 });
 
 app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <b>World</b></body></html>\n');
+  res.json(urlDatabase); //if user types in urls.json then they will land on a page that gives them the URLS in the database in a JSON format
 });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-});
+}); //gets our server ready to listen for requests and to process them
 
 app.post("/urls", (req, res) => {
   let newRandomShortURL = generateRandomString(); //makes a random short url to pair with the user input long url
