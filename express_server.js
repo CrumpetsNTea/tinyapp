@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 const bodyParser = require('body-parser');
@@ -81,6 +82,16 @@ app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL; //set a variable for the shortURL so it's easier
   const updatedLongURL = req.body.longURL; //set a variable so it's easier
   urlDatabase[shortURL] = updatedLongURL; //longURL in the database now equals the updated URL
+  res.redirect('/urls');
+});
+
+app.post('/login', (req, res) => {
+//set cookie = req.body
+//redirect to urls page
+
+  res.cookie = req.body;
+  console.log('Username:', req.body);
+  console.log('Cookie:', res.cookie);
   res.redirect('/urls');
 });
 
