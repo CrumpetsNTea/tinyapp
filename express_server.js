@@ -83,11 +83,6 @@ app.post('/urls/:shortURL/update', (req, res) => {
   res.redirect('/urls');
 });
 
-//TAKES USER TO URL PAGE TO EDIT WHEN THEY SELECT THE EDIT BUTTON ON THE MY URLS PAGE
-// app.get('urls/:url', (req, res) => {
-//   res.redirect('/urls/req.params'); //redirects to the urls page of selected url to edit
-// });
-
 app.get("/u/:shortURL", (req, res) => {
   let short = req.params.shortURL;
   let longURL = urlDatabase[short]; //if they click on the new shortURL
