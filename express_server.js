@@ -6,38 +6,43 @@ app.set('view engine', 'ejs');
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended:true}));
 
+//USED TO CREATE NEW SHORTURL
 const generateRandomString = () => {
   let result = Math.random().toString(36).substr(2, 6);
   //creates a string of 6 characters which are randomly selected from Base36
   return result;
 };
 
+//DATABASE OF URLS
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
 
-
+//URLS PAGE
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
+//ROOT PAGE
 app.get("/", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars); //takes user to MyURLs page if they just have a slash after the url
 });
 
+//NEW URL PAGE
 app.get('/urls/new', (req, res) => {
   res.render('urls_new'); //takes user to Create TinyURL page
 });
 
+//USER ACCESS SHORT URL
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL, //using the shortURL
     longURL: urlDatabase[req.params.shortURL] }; //looks up the corresponding longURL
-  if (urlDatabase[req.params.shortURL] === undefined) {
+  if (urlDatabase[req.params.shortURL] === undefined) { //if url does not exist
     res.send("Invalid Short URL"); //then tells the user and they can go back and try again
     console.log("User tried inputting invalid Short URL"); //lets server know too
   } //otherwise things go ahead as per usual - it will pass if :shortURL exists in urldatabase and will continue correctly
@@ -48,10 +53,12 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase); //if user types in urls.json then they will land on a page that gives them the URLS in the database in a JSON format
 });
 
+//GETS SERVER LISTENING
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 }); //gets our server ready to listen for requests and to process them
 
+// ADD NEW URL
 app.post("/urls", (req, res) => {
   let newRandomShortURL = generateRandomString(); //makes a random short url to pair with the user input long url
   urlDatabase[newRandomShortURL] = req.body.longURL; //adds long and short URL of user input to the urlDatabase
@@ -60,11 +67,25 @@ app.post("/urls", (req, res) => {
   console.log(urlDatabase); //logs the updated urlDatabase to the console
 });
 
+//DELETE URL
 app.post('/urls/:shortURL/delete', (req,res) => {
   
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL]; //deletes the variable
   res.redirect('/urls');
+});
+
+//UPDATE EDIT URL
+app.post('/urls/:shortURL/update', (req, res) => {
+  const shortURL = req.params.shortURL; //set a variable for the shortURL so it's easier
+  const updatedLongURL = req.body.longURL; //set a variable so it's easier
+  urlDatabase[shortURL] = updatedLongURL; //longURL in the database now equals the updated URL
+  res.redirect('/urls');
+});
+
+//TAKES USER TO URL PAGE TO EDIT WHEN THEY SELECT THE EDIT BUTTON ON THE MY URLS PAGE
+app.get('urls/:url', (req, res) => {
+  res.redirect('/urls/req.params'); //redirects to the urls page of selected url to edit
 });
 
 app.get("/u/:shortURL", (req, res) => {
