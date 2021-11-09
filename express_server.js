@@ -60,6 +60,13 @@ app.post("/urls", (req, res) => {
   console.log(urlDatabase); //logs the updated urlDatabase to the console
 });
 
+app.post('/urls/:shortURL/delete', (req,res) => {
+  
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL]; //deletes the variable
+  res.redirect('/urls');
+});
+
 app.get("/u/:shortURL", (req, res) => {
   let short = req.params.shortURL;
   let longURL = urlDatabase[short]; //if they click on the new shortURL
