@@ -96,12 +96,11 @@ app.post('/urls/:shortURL/update', (req, res) => {
   res.redirect('/urls');
 });
 
+//SET COOKIE TO SAVE INPUT USERNAME
 app.post('/login', (req, res) => {
 //set cookie = req.body
 //redirect to urls page
-  const username = req.body.username;
-  res.cookie('Username', username);
-  console.log(username);
+  res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
 
