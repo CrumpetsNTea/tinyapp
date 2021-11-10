@@ -1,26 +1,36 @@
 const express = require("express");
 const app = express();
+app.set('view engine', 'ejs');
 const PORT = 8080; // default port 8080
+
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
-app.set('view engine', 'ejs');
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended:true}));
 
-//USED TO CREATE NEW SHORTURL
+//HELPER FUNCTION TO CREATE RANDOM STINGS (USED IN SHORTURL AND USER ID'S)
 const generateRandomString = () => {
   let result = Math.random().toString(36).substr(2, 6);
   //creates a string of 6 characters which are randomly selected from Base36
   return result;
 };
 
-//DATABASE OF URLS
+//HELPER FUNCTION FOR CHECKING EMAIL IN DATABASE
+const checkEmail = (users, email) => {
+  for (let user in users) {
+    if (users[user].email === email)
+      return users[user];
+  }
+};
+
+//OBJECT OF URLS
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+//OBJECT OF USERS
 let users = {
   "userRandomID": {
     id: "userRandomID",
@@ -41,7 +51,7 @@ app.listen(PORT, () => {
 
 
 
-//ROOT PAGE
+//RENDER ROOT PAGE
 app.get("/", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
@@ -50,7 +60,7 @@ app.get("/", (req, res) => {
   res.render('urls_index', templateVars); //takes user to MyURLs page if they just have a slash after the url
 });
 
-//URLS PAGE
+//RENDER URLS PAGE
 app.get('/urls', (req, res) => {
   const templateVars = {
     urls: urlDatabase,
@@ -59,7 +69,7 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
-//Make NEW URL PAGE
+//RENDER NEW URL PAGE
 app.get('/urls/new', (req, res) => {
   const templateVars = {
     userId: req.cookies["user_id"]
@@ -135,23 +145,32 @@ app.post('/login', (req, res) => {
   res.redirect('/');
 });
 
-app.post('/logout', (req, res) => {
+//LOGOUT FUNCTION
+app.post('/logout', (req, res) => { //clears the corresponding user's cookie
   res.clearCookie("user_id");
   res.redirect('/');
 });
 
-app.get('/register', (req, res) => {
+//RENDERS REGISTER PAGE
+app.get('/register', (req, res) => { //renders our register page with the header
   const templateVars = {
     userId: req.cookies["user_id"]
   };
-
   res.render('urls_register', templateVars);
 });
 
+//REGISTER FUNCTION
 app.post('/register', (req, res) => {
   let randomUserID = generateRandomString(); //creates random ID
   const userPassword = req.body.password; //variable for their password
   const userEmail = req.body.email; //variable for email
+  if (!userPassword || !userEmail) {//if the email and/or password fields are left empty
+    res.status(400).send("Email and/or Password fields left empty"); //error code and let the user know
+  }
+  if (checkEmail(users, userEmail)) { //if the function checkEmail returns true then that means that the email is already registered
+    res.status(400).send("Oops! It looks like you're already registered"); //error code and let the user know
+  }
+  //otherwise go ahead and register them
   users[randomUserID] = {
     "id": randomUserID,
     "email": userEmail,
@@ -161,10 +180,3 @@ app.post('/register', (req, res) => {
   res.cookie("user_id", users);
   res.redirect('/urls'); //redirect the user
 });
-
-
-//This endpoint should add a new user object to the global users object.
-//The user object should include the user's id, email and password, similar to the example above.
-//To generate a random user ID, use the same function you use to generate random IDs for URLs.
-
-//lookup the user object in the users object using the user_id cookie value
