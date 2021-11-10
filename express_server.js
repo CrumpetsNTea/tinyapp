@@ -24,26 +24,37 @@ const urlDatabase = {
 
 //URLS PAGE
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"],
+  };
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
 //ROOT PAGE
 app.get("/", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render('urls_index', templateVars); //takes user to MyURLs page if they just have a slash after the url
 });
 
 //NEW URL PAGE
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new'); //takes user to Create TinyURL page
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render('urls_new', templateVars); //takes user to Create TinyURL page
 });
 
 //USER ACCESS SHORT URL
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL, //using the shortURL
-    longURL: urlDatabase[req.params.shortURL] }; //looks up the corresponding longURL
+    longURL: urlDatabase[req.params.shortURL],
+    username: req.cookies["username"]
+  }; //looks up the corresponding longURL
   if (urlDatabase[req.params.shortURL] === undefined) { //if url does not exist
     res.send("Invalid Short URL"); //then tells the user and they can go back and try again
     console.log("User tried inputting invalid Short URL"); //lets server know too
@@ -88,10 +99,9 @@ app.post('/urls/:shortURL/update', (req, res) => {
 app.post('/login', (req, res) => {
 //set cookie = req.body
 //redirect to urls page
-
-  res.cookie = req.body;
-  console.log('Username:', req.body);
-  console.log('Cookie:', res.cookie);
+  const username = req.body.username;
+  res.cookie('Username', username);
+  console.log(username);
   res.redirect('/urls');
 });
 
