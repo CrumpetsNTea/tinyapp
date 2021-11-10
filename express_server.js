@@ -104,6 +104,11 @@ app.post('/login', (req, res) => {
   res.redirect('/urls');
 });
 
+app.post('/logout', (req, res) => {
+  res.clearCookie('username', req.body.username);
+  res.redirect('urls');
+});
+
 app.get("/u/:shortURL", (req, res) => {
   let short = req.params.shortURL;
   let longURL = urlDatabase[short]; //if they click on the new shortURL
