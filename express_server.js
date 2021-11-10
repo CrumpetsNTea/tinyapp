@@ -21,6 +21,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+let users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "funk"
+  }
+};
+
 //GETS SERVER LISTENING
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -32,7 +45,7 @@ app.listen(PORT, () => {
 app.get("/", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    userId: req.cookies["user_id"]
   };
   res.render('urls_index', templateVars); //takes user to MyURLs page if they just have a slash after the url
 });
@@ -41,7 +54,7 @@ app.get("/", (req, res) => {
 app.get('/urls', (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"],
+    userId: req.cookies["user_id"]
   };
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
@@ -49,7 +62,7 @@ app.get('/urls', (req, res) => {
 //Make NEW URL PAGE
 app.get('/urls/new', (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    userId: req.cookies["user_id"]
   };
   res.render('urls_new', templateVars); //takes user to Create TinyURL page
 });
@@ -59,7 +72,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL, //using the shortURL
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]
+    userId: req.cookies["user_id"]
   }; //looks up the corresponding longURL
   if (urlDatabase[req.params.shortURL] === undefined) { //if url does not exist
     res.send("Invalid Short URL"); //then tells the user and they can go back and try again
@@ -68,6 +81,14 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars); //passes both to urls_show template and then sends the HTML to the browser
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  let short = req.params.shortURL;
+  let longURL = urlDatabase[short]; //if they click on the new shortURL
+  res.redirect(longURL); //then will redirect them to the website of the shortURL using shortURL as a key to access the value which is the longURL
+});
+
+
+//JSON OF URLS
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase); //if user types in urls.json then they will land on a page that gives them the URLS in the database in a JSON format
 });
@@ -102,19 +123,48 @@ app.post('/urls/:shortURL/update', (req, res) => {
 
 //SET COOKIE TO SAVE INPUT USERNAME
 app.post('/login', (req, res) => {
-//set cookie = req.body
-//redirect to urls page
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
+  let randomUserID = generateRandomString(); //creates random ID
+  const userPassword = req.body.password; //variable for their password
+  const userEmail = req.body.email; //variable for email
+  users[randomUserID] = {
+    "id": randomUserID,
+    "email": userEmail,
+    "password": userPassword
+  };
+  res.cookie("user_id", users[randomUserID]);
+  res.redirect('/');
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  res.redirect('urls');
+  res.clearCookie("user_id");
+  res.redirect('/');
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  let short = req.params.shortURL;
-  let longURL = urlDatabase[short]; //if they click on the new shortURL
-  res.redirect(longURL); //then will redirect them to the website of the shortURL using shortURL as a key to access the value which is the longURL
+app.get('/register', (req, res) => {
+  const templateVars = {
+    userId: req.cookies["user_id"]
+  };
+
+  res.render('urls_register', templateVars);
 });
+
+app.post('/register', (req, res) => {
+  let randomUserID = generateRandomString(); //creates random ID
+  const userPassword = req.body.password; //variable for their password
+  const userEmail = req.body.email; //variable for email
+  users[randomUserID] = {
+    "id": randomUserID,
+    "email": userEmail,
+    "password": userPassword
+  };
+  console.log(users);
+  res.cookie("user_id", users);
+  res.redirect('/urls'); //redirect the user
+});
+
+
+//This endpoint should add a new user object to the global users object.
+//The user object should include the user's id, email and password, similar to the example above.
+//To generate a random user ID, use the same function you use to generate random IDs for URLs.
+
+//lookup the user object in the users object using the user_id cookie value
