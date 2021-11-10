@@ -8,15 +8,13 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <% if(username){ %>
+        <% if(userId){ %>
           <form method="POST" action="/logout" class="form-inline">
-            <div class="form-inline">
-              <span style="margin-left: 780px; "  >Logged In As: <%= username %></span>
+              <span style="margin-left: 740px; "  >Logged In As: <%= userId["email"] %></span>
               <button type="submit" class="btn btn-outline-dark" style="margin-left: 10px">Logout</button>
-            </div>
           </form>
-            <% } if(!username) { %>  
-        <form method="POST" action="/login" class="form-inline">
+            <% } if(!userId) { %>  
+          <form method="POST" action="/login" class="form-inline">
           <input class="form-control" type="text" id="username" name="username" style="width: 200px; margin-left: 780px; ">
           <button type="submit" class="btn btn-primary" style="margin-left: 10px">Login</button>
           <% } %>
