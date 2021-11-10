@@ -21,15 +21,12 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//GETS SERVER LISTENING
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+}); //gets our server ready to listen for requests and to process them
 
-//URLS PAGE
-app.get('/urls', (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    username: req.cookies["username"],
-  };
-  res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
-});
+
 
 //ROOT PAGE
 app.get("/", (req, res) => {
@@ -40,7 +37,16 @@ app.get("/", (req, res) => {
   res.render('urls_index', templateVars); //takes user to MyURLs page if they just have a slash after the url
 });
 
-//NEW URL PAGE
+//URLS PAGE
+app.get('/urls', (req, res) => {
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"],
+  };
+  res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
+});
+
+//Make NEW URL PAGE
 app.get('/urls/new', (req, res) => {
   const templateVars = {
     username: req.cookies["username"],
@@ -66,10 +72,7 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase); //if user types in urls.json then they will land on a page that gives them the URLS in the database in a JSON format
 });
 
-//GETS SERVER LISTENING
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-}); //gets our server ready to listen for requests and to process them
+
 
 // ADD NEW URL
 app.post("/urls", (req, res) => {
@@ -88,7 +91,7 @@ app.post('/urls/:shortURL/delete', (req,res) => {
   res.redirect('/urls');
 });
 
-//UPDATE EDIT URL
+//UPDATE/EDIT URL
 app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL; //set a variable for the shortURL so it's easier
   const updatedLongURL = req.body.longURL; //set a variable so it's easier
@@ -106,7 +109,7 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username', req.body.username);
+  res.clearCookie('username');
   res.redirect('urls');
 });
 

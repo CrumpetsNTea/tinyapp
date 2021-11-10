@@ -15,7 +15,7 @@
               <button type="submit" class="btn btn-outline-dark" style="margin-left: 10px">Logout</button>
             </div>
           </form>
-            <% } else { %>  
+            <% } if(!username) { %>  
         <form method="POST" action="/login" class="form-inline">
           <input class="form-control" type="text" id="username" name="username" style="width: 200px; margin-left: 780px; ">
           <button type="submit" class="btn btn-primary" style="margin-left: 10px">Login</button>
