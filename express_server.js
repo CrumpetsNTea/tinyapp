@@ -25,6 +25,7 @@ const checkEmail = (users, email) => {
   }
 };
 
+//HELPER FUNCTION FOR CHECKING PASSWORD IN DATABASE
 const checkPassword = (users, password) => {
   for (let user in users) {
     if (users[user].password === password) {
@@ -140,7 +141,7 @@ app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL; //set a variable for the shortURL so it's easier
   const updatedLongURL = req.body.longURL; //set a variable so it's easier
   urlDatabase[shortURL] = updatedLongURL; //longURL in the database now equals the updated URL
-  console.log("Updated URL");
+  console.log("Updated URL"); //lets server-side know that a URL was updated successfully
   res.redirect('/urls');
 });
 
@@ -154,7 +155,7 @@ app.get('/login', (req, res) => {
 
 //LOGIN FUNCTION
 app.post('/login', (req, res) => {
-  const userInfo = {
+  const userInfo = {//object to hold these variables so they can be passed to the header upon successsful login to display user email
     userPassword: req.body.password,
     email: req.body.email
   };
@@ -165,7 +166,7 @@ app.post('/login', (req, res) => {
     res.status(403).send("Oops! Looks like that email is not associated with an account"); //error code and let the user know
   }
   if (checkEmail(users, userInfo.email)) { //if the function checkEmail returns true then that means that the email is already registered
-    if (!checkPassword(users, userInfo.userPassword)) {
+    if (!checkPassword(users, userInfo.userPassword)) { //if checkPassword fails then it means the user input the wrong password
       res.status(403).send("Oops! Wrong Password");
     }
     res.cookie("user_id", userInfo);
@@ -204,7 +205,7 @@ app.post('/register', (req, res) => {
     "email": userEmail,
     "password": userPassword
   };
-  console.log(users);
+  console.log(users); //console.logs the database of users just so we can check that it is working properly
   res.cookie("user_id", users[randomUserID]);
   res.redirect('/urls'); //redirect the user
 });
