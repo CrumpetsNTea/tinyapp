@@ -104,7 +104,6 @@ app.get('/urls.json', (req, res) => {
 });
 
 
-
 // ADD NEW URL
 app.post("/urls", (req, res) => {
   let newRandomShortURL = generateRandomString(); //makes a random short url to pair with the user input long url
@@ -129,6 +128,14 @@ app.post('/urls/:shortURL/update', (req, res) => {
   urlDatabase[shortURL] = updatedLongURL; //longURL in the database now equals the updated URL
   console.log("Updated URL");
   res.redirect('/urls');
+});
+
+//LOGIN PAGE
+app.get('/login', (req, res) => {
+  const templateVars = {
+    userId: req.cookies["user_id"]
+  };
+  res.render('urls_login', templateVars); //takes user to Create TinyURL page
 });
 
 //SET COOKIE TO SAVE INPUT USERNAME
