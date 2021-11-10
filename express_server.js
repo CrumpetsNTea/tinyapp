@@ -19,8 +19,17 @@ const generateRandomString = () => {
 //HELPER FUNCTION FOR CHECKING EMAIL IN DATABASE
 const checkEmail = (users, email) => {
   for (let user in users) {
-    if (users[user].email === email)
+    if (users[user].email === email) {
       return users[user];
+    }
+  }
+};
+
+const checkPassword = (users, password) => {
+  for (let user in users) {
+    if (users[user].password === password) {
+      return users[user];
+    }
   }
 };
 
@@ -41,6 +50,11 @@ let users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "funk"
+  },
+  "Doug Judy": {
+    id: "pontiacbandit",
+    email: "pontiac@bandit.com",
+    password: "jakeperalta"
   }
 };
 
@@ -138,18 +152,25 @@ app.get('/login', (req, res) => {
   res.render('urls_login', templateVars); //takes user to Create TinyURL page
 });
 
-//SET COOKIE TO SAVE INPUT USERNAME
+//LOGIN FUNCTION
 app.post('/login', (req, res) => {
-  let randomUserID = generateRandomString(); //creates random ID
-  const userPassword = req.body.password; //variable for their password
-  const userEmail = req.body.email; //variable for email
-  users[randomUserID] = {
-    "id": randomUserID,
-    "email": userEmail,
-    "password": userPassword
+  const userInfo = {
+    userPassword: req.body.password,
+    email: req.body.email
   };
-  res.cookie("user_id", users[randomUserID]);
-  res.redirect('/');
+  if (!userInfo.userPassword || !userInfo.email) {//if the email and/or password fields are left empty
+    res.status(400).send("Email and/or Password fields left empty"); //error code and let the user know
+  }
+  if (!checkEmail(users, userInfo.email)) { //if the function checkEmail returns false then that means that the email is not registered
+    res.status(403).send("Oops! Looks like that email is not associated with an account"); //error code and let the user know
+  }
+  if (checkEmail(users, userInfo.email)) { //if the function checkEmail returns true then that means that the email is already registered
+    if (!checkPassword(users, userInfo.userPassword)) {
+      res.status(403).send("Oops! Wrong Password");
+    }
+    res.cookie("user_id", userInfo);
+    res.redirect('/urls');
+  }
 });
 
 //LOGOUT FUNCTION
@@ -184,6 +205,6 @@ app.post('/register', (req, res) => {
     "password": userPassword
   };
   console.log(users);
-  res.cookie("user_id", users);
+  res.cookie("user_id", users[randomUserID]);
   res.redirect('/urls'); //redirect the user
 });
