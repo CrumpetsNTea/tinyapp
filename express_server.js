@@ -93,6 +93,7 @@ app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL; //set a variable for the shortURL so it's easier
   const updatedLongURL = req.body.longURL; //set a variable so it's easier
   urlDatabase[shortURL] = updatedLongURL; //longURL in the database now equals the updated URL
+  console.log("Updated URL");
   res.redirect('/urls');
 });
 
