@@ -14,9 +14,9 @@
               <button type="submit" class="btn btn-outline-dark" style="margin-left: 10px">Logout</button>
           </form>
             <% } if(!userId) { %>  
-          <form method="POST" action="/login" class="form-inline">
-          <input class="form-control" type="text" id="username" name="username" style="width: 200px; margin-left: 780px; ">
-          <button type="submit" class="btn btn-primary" style="margin-left: 10px">Login</button>
+              <a href="/login" class="btn btn-primary" style="margin-left: 900px">Login</a>
+              <a href="/register" class="btn btn-warning" style="margin-left: 5px">Register</a>
+
           <% } %>
       </div>
     </div>
