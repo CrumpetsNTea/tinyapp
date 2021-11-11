@@ -36,8 +36,15 @@ const checkPassword = (users, password) => {
 
 //OBJECT OF URLS
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "pontiacbandit"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "pontiacbandit"
+  },
+
 };
 
 //OBJECT OF USERS
@@ -70,6 +77,7 @@ app.listen(PORT, () => {
 app.get("/", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
+    longURL: urlDatabase["longURL"],
     userId: req.cookies["user_id"]
   };
   res.render('urls_index', templateVars); //takes user to MyURLs page if they just have a slash after the url
@@ -100,7 +108,7 @@ app.get('/urls/new', (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL, //using the shortURL
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     userId: req.cookies["user_id"]
   };
   if (!templateVars.userId) { //if there is no userId
@@ -114,9 +122,13 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let short = req.params.shortURL;
-  let longURL = urlDatabase[short]; //if they click on the new shortURL
-  res.redirect(longURL); //then will redirect them to the website of the shortURL using shortURL as a key to access the value which is the longURL
+  if (urlDatabase[req.params.shortURL]) {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    if (longURL === undefined) {
+      res.status(404).send("Short URL does not exist");
+    }
+    res.redirect(longURL);
+  }
 });
 
 
@@ -134,12 +146,10 @@ app.post("/urls", (req, res) => {
   if (!templateVars.userId) { //if there is no userId
     res.send('Must be logged in to be able to ADD a new URL'); //redirect user because they have to be logged in or have an account to use the functions
   }
-
-  let newRandomShortURL = generateRandomString(); //makes a random short url to pair with the user input long url
-  urlDatabase[newRandomShortURL] = req.body.longURL; //adds long and short URL of user input to the urlDatabase
-  console.log(req.body);  // Log the POST request body (longURL) to the console
-  res.redirect(`/urls/${newRandomShortURL}`);//redirects user to the newly generated shortURLs page
-  console.log(urlDatabase); //logs the updated urlDatabase to the console
+  let newShortURL = generateRandomString();
+  urlDatabase[newShortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"].email};
+  console.log(urlDatabase);
+  res.redirect(`/urls/${newShortURL}`);
 });
 
 //DELETE URL
@@ -152,6 +162,7 @@ app.post('/urls/:shortURL/delete', (req,res) => {
   }
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL]; //deletes the variable
+  console.log(urlDatabase);
   res.redirect('/urls');
 });
 
@@ -163,10 +174,9 @@ app.post('/urls/:shortURL/update', (req, res) => {
   if (!templateVars.userId) { //if there is no userId
     res.send('Must be logged in to be able to edit or update URL'); //redirect user because they have to be logged in or have an account to use the functions
   }
-
   const shortURL = req.params.shortURL; //set a variable for the shortURL so it's easier
   const updatedLongURL = req.body.longURL; //set a variable so it's easier
-  urlDatabase[shortURL] = updatedLongURL; //longURL in the database now equals the updated URL
+  urlDatabase[shortURL].longURL = updatedLongURL; //longURL in the database now equals the updated URL
   console.log("Updated URL"); //lets server-side know that a URL was updated successfully
   res.redirect('/urls');
 });
