@@ -81,6 +81,7 @@ app.get('/urls', (req, res) => {
     urls: urlDatabase,
     userId: req.cookies["user_id"]
   };
+
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
@@ -89,6 +90,9 @@ app.get('/urls/new', (req, res) => {
   const templateVars = {
     userId: req.cookies["user_id"]
   };
+  if (!templateVars.userId) { //if there is no userId
+    res.redirect('/login'); //redirect user because they have to be logged in or have an account to use the functions
+  }
   res.render('urls_new', templateVars); //takes user to Create TinyURL page
 });
 
@@ -98,7 +102,10 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL, //using the shortURL
     longURL: urlDatabase[req.params.shortURL],
     userId: req.cookies["user_id"]
-  }; //looks up the corresponding longURL
+  };
+  if (!templateVars.userId) { //if there is no userId
+    res.send('Must be logged in to be able to EDIT a URL'); //redirect user because they have to be logged in or have an account to use the functions
+  }
   if (urlDatabase[req.params.shortURL] === undefined) { //if url does not exist
     res.send("Invalid Short URL"); //then tells the user and they can go back and try again
     console.log("User tried inputting invalid Short URL"); //lets server know too
@@ -121,6 +128,13 @@ app.get('/urls.json', (req, res) => {
 
 // ADD NEW URL
 app.post("/urls", (req, res) => {
+  const templateVars = {
+    userId: req.cookies["user_id"]
+  };
+  if (!templateVars.userId) { //if there is no userId
+    res.send('Must be logged in to be able to ADD a new URL'); //redirect user because they have to be logged in or have an account to use the functions
+  }
+
   let newRandomShortURL = generateRandomString(); //makes a random short url to pair with the user input long url
   urlDatabase[newRandomShortURL] = req.body.longURL; //adds long and short URL of user input to the urlDatabase
   console.log(req.body);  // Log the POST request body (longURL) to the console
@@ -130,7 +144,12 @@ app.post("/urls", (req, res) => {
 
 //DELETE URL
 app.post('/urls/:shortURL/delete', (req,res) => {
-  
+  const templateVars = {
+    userId: req.cookies["user_id"]
+  };
+  if (!templateVars.userId) { //if there is no userId
+    res.send('Must be logged in to be able to DELETE a URL'); //redirect user because they have to be logged in or have an account to use the functions
+  }
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL]; //deletes the variable
   res.redirect('/urls');
@@ -138,6 +157,13 @@ app.post('/urls/:shortURL/delete', (req,res) => {
 
 //UPDATE/EDIT URL
 app.post('/urls/:shortURL/update', (req, res) => {
+  const templateVars = {
+    userId: req.cookies["user_id"]
+  };
+  if (!templateVars.userId) { //if there is no userId
+    res.send('Must be logged in to be able to edit or update URL'); //redirect user because they have to be logged in or have an account to use the functions
+  }
+
   const shortURL = req.params.shortURL; //set a variable for the shortURL so it's easier
   const updatedLongURL = req.body.longURL; //set a variable so it's easier
   urlDatabase[shortURL] = updatedLongURL; //longURL in the database now equals the updated URL
