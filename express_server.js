@@ -126,8 +126,8 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[req.params.shortURL].longURL,
     userId: req.cookies["user_id"]
   };
-  if (!urlsForUser(req.cookies["user_id"], urlDatabase)[req.params.shortURL]) {
-    res.status(403).send("Sorry, the URL you requested is not in your database");
+  if (!urlsForUser(req.cookies["user_id"].email, urlDatabase)[req.params.shortURL]) {
+    res.status(401).send("Sorry, you do not have access to this URL");
   }
   if (!templateVars.userId) { //if there is no userId
     res.send('Must be logged in to be able to see URLs'); //redirect user because they have to be logged in or have an account to use the functions
