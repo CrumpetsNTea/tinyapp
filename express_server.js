@@ -9,6 +9,8 @@ app.use(cookieParser());
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended:true}));
 
+const bcrypt = require('bcryptjs');
+
 //HELPER FUNCTION TO CREATE RANDOM STINGS (USED IN SHORTURL AND USER ID'S)
 const generateRandomString = () => {
   let result = Math.random().toString(36).substr(2, 6);
@@ -28,7 +30,7 @@ const checkEmail = (users, email) => {
 //HELPER FUNCTION FOR CHECKING PASSWORD IN DATABASE
 const checkPassword = (users, password) => {
   for (let user in users) {
-    if (users[user].password === password) {
+    if (bcrypt.compareSync(password, users[user].password)) {
       return users[user];
     }
   }
@@ -63,17 +65,17 @@ let users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple"
+    password: bcrypt.hashSync("purple", 10)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "funk"
+    password: bcrypt.hashSync("funk", 10)
   },
   "Doug Judy": {
     id: "pontiacbandit",
     email: "pontiac@bandit.com",
-    password: "jakeperalta"
+    password: bcrypt.hashSync("jakeperalta", 10)
   }
 };
 
@@ -91,7 +93,7 @@ app.get('/', (req, res) => {
     urls: urlsForUser(req.cookies["user_id"], urlDatabase)
   };
   if (!templateVars.userId) { //if there is no userId
-    res.status(401).redirect('/login'); //401 unauthorized
+    res.redirect('/login');
   }
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
@@ -103,7 +105,7 @@ app.get('/urls', (req, res) => {
     urls: urlsForUser(req.cookies["user_id"].email, urlDatabase)
   };
   if (!templateVars.userId) { //if there is no userId
-    res.status(401).redirect('/login');//401 unauthorized
+    res.redirect('/login');//401 unauthorized
   }
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
@@ -127,14 +129,14 @@ app.get("/urls/:shortURL", (req, res) => {
     userId: req.cookies["user_id"]
   };
   if (!urlsForUser(req.cookies["user_id"].email, urlDatabase)[req.params.shortURL]) {
-    res.status(401).send("Sorry, you do not have access to this URL");
+    return res.send("Sorry, you do not have access to this URL").status(401);
   }
   if (!templateVars.userId) { //if there is no userId
-    res.status(401).send('Must be logged in to be able to see URLs'); //redirect user because they have to be logged in or have an account to use the functions
+    return res.send('Must be logged in to be able to see URLs').status(401); //redirect user because they have to be logged in or have an account to use the functions
   }
   if (urlDatabase[req.params.shortURL] === undefined) { //if url does not exist
-    res.status(400).send("Invalid Short URL"); //then tells the user and they can go back and try again
     console.log("User tried inputting invalid Short URL"); //lets server know too
+    return res.send("Invalid Short URL").status(400); //then tells the user and they can go back and try again
   } //otherwise things go ahead as per usual - it will pass if :shortURL exists in urldatabase and will continue correctly
   res.render("urls_show", templateVars); //passes both to urls_show template and then sends the HTML to the browser
 });
@@ -143,7 +145,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL].longURL;
     if (longURL === undefined) {
-      res.status(404).send("Short URL does not exist");
+      return res.send("Short URL does not exist").status(404);
     }
     res.redirect(longURL);
   }
@@ -162,7 +164,7 @@ app.post("/urls", (req, res) => {
     userId: req.cookies["user_id"]
   };
   if (!templateVars.userId) { //if there is no userId
-    res.status(400).send('Must be logged in to be able to ADD a new URL'); //redirect user because they have to be logged in or have an account to use the functions
+    return res.send('Must be logged in to be able to ADD a new URL').status(400); //redirect user because they have to be logged in or have an account to use the functions
   }
   let newShortURL = generateRandomString();
   urlDatabase[newShortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"].email};
@@ -176,11 +178,11 @@ app.post('/urls/:shortURL/delete', (req,res) => {
     userId: req.cookies["user_id"].email
   };
   if (!templateVars.userId) { //if there is no userId
-    res.status(400).send('Must be logged in to be able to DELETE a URL'); //redirect user because they have to be logged in or have an account to use the functions
+    return res.send('Must be logged in to be able to DELETE a URL').status(400); //redirect user because they have to be logged in or have an account to use the functions
   }
   const shortURL = req.params.shortURL;
   if (!urlsForUser(req.cookies["user_id"].email, urlDatabase)[shortURL]) {//if user does not own URL
-    res.status(400).send("You do not have access to that URL");
+    return res.send("You do not have access to that URL").status(400);
   }
   delete urlDatabase[shortURL];
   res.redirect("/urls");
@@ -192,12 +194,12 @@ app.post('/urls/:shortURL/update', (req, res) => {
     userId: req.cookies["user_id"]
   };
   if (!templateVars.userId) { //if there is no userId
-    res.send('Must be logged in to be able to edit or update URL'); //redirect user because they have to be logged in or have an account to use the functions
+    return res.send('Must be logged in to be able to edit or update URL').status(400); //redirect user because they have to be logged in or have an account to use the functions
   }
   const shortURL = req.params.shortURL; //set a variable for the shortURL so it's easier
   const updatedLongURL = req.body.longURL; //set a variable so it's easier
   if (!urlsForUser(req.cookies["user_id"].email, urlDatabase)[shortURL]) { //if user does not own URL
-    res.status(400).send("You do not have access to that URL");
+    return res.send("You do not have access to that URL").status(400);
   }
   if (urlDatabase[req.params.shortURL].userID === templateVars.userId.email)
     urlDatabase[shortURL].longURL = updatedLongURL; //longURL in the database now equals the updated URL
@@ -220,24 +222,24 @@ app.post('/login', (req, res) => {
     email: req.body.email
   };
   if (!userInfo.userPassword || !userInfo.email) {//if the email and/or password fields are left empty
-    res.status(400).send("Email and/or Password fields left empty"); //error code and let the user know
+    return res.send("Email and/or Password fields left empty").status(400); //error code and let the user know
   }
   if (!checkEmail(users, userInfo.email)) { //if the function checkEmail returns false then that means that the email is not registered
-    res.status(403).send("Oops! Looks like that email is not associated with an account"); //error code and let the user know
+    return res.send("Oops! Looks like that email is not associated with an account").status(403); //error code and let the user know
   }
   if (checkEmail(users, userInfo.email)) { //if the function checkEmail returns true then that means that the email is already registered
     if (!checkPassword(users, userInfo.userPassword)) { //if checkPassword fails then it means the user input the wrong password
-      res.status(403).send("Oops! Wrong Password");
+      return res.send("Oops! Wrong Password").status(403);
     }
     res.cookie("user_id", userInfo);
-    res.redirect('/urls');
+    return res.redirect('/urls');
   }
 });
 
 //LOGOUT FUNCTION
 app.post('/logout', (req, res) => { //clears the corresponding user's cookie
   res.clearCookie("user_id");
-  res.redirect('/');
+  res.redirect('/login');
 });
 
 //RENDERS REGISTER PAGE
@@ -254,16 +256,16 @@ app.post('/register', (req, res) => {
   const userPassword = req.body.password; //variable for their password
   const userEmail = req.body.email; //variable for email
   if (!userPassword || !userEmail) {//if the email and/or password fields are left empty
-    res.status(400).send("Email and/or Password fields left empty"); //error code and let the user know
+    return res.send("Email and/or Password fields left empty").status(400); //error code and let the user know
   }
   if (checkEmail(users, userEmail)) { //if the function checkEmail returns true then that means that the email is already registered
-    res.status(400).send("Oops! It looks like you're already registered"); //error code and let the user know
+    return res.send("Oops! It looks like you're already registered").status(400); //error code and let the user know
   }
   //otherwise go ahead and register them
   users[randomUserID] = {
     "id": randomUserID,
     "email": userEmail,
-    "password": userPassword
+    "password": bcrypt.hashSync(userPassword, 10)
   };
   console.log(users); //console.logs the database of users just so we can check that it is working properly
   res.cookie("user_id", users[randomUserID]);
