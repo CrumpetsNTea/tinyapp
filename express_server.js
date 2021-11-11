@@ -34,15 +34,26 @@ const checkPassword = (users, password) => {
   }
 };
 
+//HELPER FUNCTION FOR USERS ONLY BEING ABLE TO SEE URLS TIED TO THEIR ACCOUNT
+const urlsForUser = function(id, urlDatabase) {
+  const userURLs = {};
+  for (let shortURL in urlDatabase) {
+    if (id === urlDatabase[shortURL].userID) {
+      userURLs[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userURLs;
+};
+
 //OBJECT OF URLS
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
-    userID: "pontiacbandit"
+    userID: "pontiac@bandit.com"
   },
   "9sm5xK": {
     longURL: "http://www.google.com",
-    userID: "pontiacbandit"
+    userID: "pontiac"
   },
 
 };
@@ -74,22 +85,26 @@ app.listen(PORT, () => {
 
 
 //RENDER ROOT PAGE
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
   const templateVars = {
-    urls: urlDatabase,
-    longURL: urlDatabase["longURL"],
-    userId: req.cookies["user_id"]
+    userId: req.cookies["user_id"],
+    urls: urlsForUser(req.cookies["user_id"], urlDatabase)
   };
-  res.render('urls_index', templateVars); //takes user to MyURLs page if they just have a slash after the url
+  if (!templateVars.userId) { //if there is no userId
+    res.status(401).redirect('/login'); //401 unauthorized
+  }
+  res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
-//RENDER URLS PAGE
+//RENDER URLS/ROOT PAGE
 app.get('/urls', (req, res) => {
   const templateVars = {
-    urls: urlDatabase,
-    userId: req.cookies["user_id"]
+    userId: req.cookies["user_id"],
+    urls: urlsForUser(req.cookies["user_id"].email, urlDatabase)
   };
-
+  if (!templateVars.userId) { //if there is no userId
+    res.status(401).redirect('/login');//401 unauthorized
+  }
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
@@ -99,7 +114,7 @@ app.get('/urls/new', (req, res) => {
     userId: req.cookies["user_id"]
   };
   if (!templateVars.userId) { //if there is no userId
-    res.redirect('/login'); //redirect user because they have to be logged in or have an account to use the functions
+    res.redirect('/login');
   }
   res.render('urls_new', templateVars); //takes user to Create TinyURL page
 });
@@ -111,8 +126,11 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[req.params.shortURL].longURL,
     userId: req.cookies["user_id"]
   };
+  if (!urlsForUser(req.cookies["user_id"], urlDatabase)[req.params.shortURL]) {
+    res.status(403).send("Sorry, the URL you requested is not in your database");
+  }
   if (!templateVars.userId) { //if there is no userId
-    res.send('Must be logged in to be able to EDIT a URL'); //redirect user because they have to be logged in or have an account to use the functions
+    res.send('Must be logged in to be able to see URLs'); //redirect user because they have to be logged in or have an account to use the functions
   }
   if (urlDatabase[req.params.shortURL] === undefined) { //if url does not exist
     res.send("Invalid Short URL"); //then tells the user and they can go back and try again
