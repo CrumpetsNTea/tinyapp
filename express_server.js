@@ -130,10 +130,10 @@ app.get("/urls/:shortURL", (req, res) => {
     res.status(401).send("Sorry, you do not have access to this URL");
   }
   if (!templateVars.userId) { //if there is no userId
-    res.send('Must be logged in to be able to see URLs'); //redirect user because they have to be logged in or have an account to use the functions
+    res.status(401).send('Must be logged in to be able to see URLs'); //redirect user because they have to be logged in or have an account to use the functions
   }
   if (urlDatabase[req.params.shortURL] === undefined) { //if url does not exist
-    res.send("Invalid Short URL"); //then tells the user and they can go back and try again
+    res.status(400).send("Invalid Short URL"); //then tells the user and they can go back and try again
     console.log("User tried inputting invalid Short URL"); //lets server know too
   } //otherwise things go ahead as per usual - it will pass if :shortURL exists in urldatabase and will continue correctly
   res.render("urls_show", templateVars); //passes both to urls_show template and then sends the HTML to the browser
@@ -162,7 +162,7 @@ app.post("/urls", (req, res) => {
     userId: req.cookies["user_id"]
   };
   if (!templateVars.userId) { //if there is no userId
-    res.send('Must be logged in to be able to ADD a new URL'); //redirect user because they have to be logged in or have an account to use the functions
+    res.status(400).send('Must be logged in to be able to ADD a new URL'); //redirect user because they have to be logged in or have an account to use the functions
   }
   let newShortURL = generateRandomString();
   urlDatabase[newShortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"].email};
@@ -173,15 +173,17 @@ app.post("/urls", (req, res) => {
 //DELETE URL
 app.post('/urls/:shortURL/delete', (req,res) => {
   const templateVars = {
-    userId: req.cookies["user_id"]
+    userId: req.cookies["user_id"].email
   };
   if (!templateVars.userId) { //if there is no userId
-    res.send('Must be logged in to be able to DELETE a URL'); //redirect user because they have to be logged in or have an account to use the functions
+    res.status(400).send('Must be logged in to be able to DELETE a URL'); //redirect user because they have to be logged in or have an account to use the functions
   }
   const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL]; //deletes the variable
-  console.log(urlDatabase);
-  res.redirect('/urls');
+  if (!urlsForUser(req.cookies["user_id"].email, urlDatabase)[shortURL]) {//if user does not own URL
+    res.status(400).send("You do not have access to that URL");
+  }
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
 });
 
 //UPDATE/EDIT URL
@@ -194,7 +196,11 @@ app.post('/urls/:shortURL/update', (req, res) => {
   }
   const shortURL = req.params.shortURL; //set a variable for the shortURL so it's easier
   const updatedLongURL = req.body.longURL; //set a variable so it's easier
-  urlDatabase[shortURL].longURL = updatedLongURL; //longURL in the database now equals the updated URL
+  if (!urlsForUser(req.cookies["user_id"].email, urlDatabase)[shortURL]) { //if user does not own URL
+    res.status(400).send("You do not have access to that URL");
+  }
+  if (urlDatabase[req.params.shortURL].userID === templateVars.userId.email)
+    urlDatabase[shortURL].longURL = updatedLongURL; //longURL in the database now equals the updated URL
   console.log("Updated URL"); //lets server-side know that a URL was updated successfully
   res.redirect('/urls');
 });
