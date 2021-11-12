@@ -113,9 +113,9 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post('/urls/:shortURL', (req, res) => {
   if (!req.session.userID) {
-    return res.status(404).send();
+    return res.status(400).send();
   } else if (urlDatabase[req.params].userID !== req.session.userID) {
-    return res.status(404).send();
+    return res.status(400).send();
   }
   res.redirect('/urls/:shortURL');
 });
