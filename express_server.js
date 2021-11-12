@@ -79,7 +79,7 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
-//RENDER NEW URL PAGE
+//GET REQUESTS FOR RENDERING NEW URL PAGE
 app.get('/urls/new', (req, res) => {
   const templateVars = {
     userId: req.session.userID
@@ -90,7 +90,7 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new', templateVars); //takes user to Create TinyURL page
 });
 
-//USER ACCESS SHORT URL
+//GET REQUESTS FOR USER ACCESSING SHORT URL
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL, //using the shortURL
@@ -115,6 +115,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars); //passes both to urls_show template and then sends the HTML to the browser
 });
 
+//POST REQUESTS FOR URLS EXISTING IN DATABASE
 app.post('/urls/:shortURL', (req, res) => {
   if (!req.session.userID) {
     return res.status(400).send('You need to be logged in to view URLs');
@@ -124,6 +125,7 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect('/urls/:shortURL');
 });
 
+//GET REQUESTS IN THE URL BAR USING /u/ AND A SHORT URL
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   if (shortURL in urlDatabase === false) {
