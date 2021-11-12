@@ -92,9 +92,8 @@ app.get('/urls/new', (req, res) => {
 
 //USER ACCESS SHORT URL
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {
+  let templateVars = {
     shortURL: req.params.shortURL, //using the shortURL
-    longURL: urlDatabase[req.params.shortURL].longURL,
     userId: req.session.userID
   };
   if (!templateVars.userId) { //if there is no userId
@@ -108,14 +107,19 @@ app.get("/urls/:shortURL", (req, res) => {
   if (!req.session.userID.id === urlDatabase[templateVars.shortURL].userID) {
     return res.send("Sorry, you do not have access to this URL").status(401);
   }
+  templateVars = {
+    shortURL: req.params.shortURL, //using the shortURL
+    longURL: urlDatabase[req.params.shortURL].longURL,
+    userId: req.session.userID
+  };
   res.render("urls_show", templateVars); //passes both to urls_show template and then sends the HTML to the browser
 });
 
 app.post('/urls/:shortURL', (req, res) => {
   if (!req.session.userID) {
-    return res.status(400).send();
+    return res.status(400).send('You need to be logged in to view URLs');
   } else if (urlDatabase[req.params].userID !== req.session.userID) {
-    return res.status(400).send();
+    return res.status(400).send('You do not have access to that URL');
   }
   res.redirect('/urls/:shortURL');
 });
