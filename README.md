@@ -4,9 +4,17 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
+!["Screenshot of User Registration Page"](https://github.com/CrumpetsNTea/tinyapp/blob/master/docs/registration_page.png?raw=true)
 
-!["screenshot description"](#)
+!["Screenshot of Login Page"](https://github.com/CrumpetsNTea/tinyapp/blob/master/docs/login_page.png?raw=true)
+
+!["Screenshot of the Main URLs Page While Logged In"](https://github.com/CrumpetsNTea/tinyapp/blob/master/docs/main_urls_page_logged_in.png?raw=true)
+
+!["Screenshot of the Create a Tiny URL Page"](https://github.com/CrumpetsNTea/tinyapp/blob/master/docs/create_tiny_url_page.png?raw=true)
+
+!["Screenshot of the URL Editor Page"](https://github.com/CrumpetsNTea/tinyapp/blob/master/docs/url_editor_page.png?raw=true)
+
+!["Screenshot of the URLs Page After Adding A New URL"](https://github.com/CrumpetsNTea/tinyapp/blob/master/docs/urls_page_after_adding_new_url.png?raw=true)
 
 ## Features
   - Cookie Encryption
