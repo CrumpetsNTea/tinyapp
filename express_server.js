@@ -67,7 +67,7 @@ app.get('/', (req, res) => {
 });
 
 
-//RENDER URLS/ROOT PAGE
+//RENDER URLS PAGE
 app.get('/urls', (req, res) => {
   let templateVars = {
     userId: req.session.userID,
