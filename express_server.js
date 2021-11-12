@@ -53,7 +53,6 @@ app.listen(PORT, () => {
 }); //gets our server ready to listen for requests and to process them
 
 
-
 //RENDER ROOT PAGE
 app.get('/', (req, res) => {
   const templateVars = {
@@ -67,6 +66,7 @@ app.get('/', (req, res) => {
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
+
 //RENDER URLS/ROOT PAGE
 app.get('/urls', (req, res) => {
   let templateVars = {
@@ -79,6 +79,7 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
 });
 
+
 //GET REQUESTS FOR RENDERING NEW URL PAGE
 app.get('/urls/new', (req, res) => {
   const templateVars = {
@@ -89,6 +90,7 @@ app.get('/urls/new', (req, res) => {
   }
   res.render('urls_new', templateVars); //takes user to Create TinyURL page
 });
+
 
 //GET REQUESTS FOR USER ACCESSING SHORT URL
 app.get('/urls/:shortURL', (req, res) => {
@@ -104,9 +106,10 @@ app.get('/urls/:shortURL', (req, res) => {
     return res.send('Invalid Short URL').status(400); //then tells the user and they can go back and try again
   } //otherwise things go ahead as per usual - it will pass if :shortURL exists in urldatabase and will continue correctly
 
-  if (!req.session.userID.id === urlDatabase[templateVars.shortURL].userID) {
+  if (!req.session.userID.id === urlDatabase[templateVars.shortURL].userID) { //if user does not own the URL
     return res.send('Sorry, you do not have access to this URL').status(401);
   }
+  //had to put longURL here in templateVars because it was throwing an error if it was at the top
   templateVars = {
     shortURL: req.params.shortURL, //using the shortURL
     longURL: urlDatabase[req.params.shortURL].longURL,
@@ -114,6 +117,7 @@ app.get('/urls/:shortURL', (req, res) => {
   };
   res.render('urls_show', templateVars); //passes both to urls_show template and then sends the HTML to the browser
 });
+
 
 //POST REQUESTS FOR URLS EXISTING IN DATABASE
 app.post('/urls/:shortURL', (req, res) => {
@@ -124,6 +128,7 @@ app.post('/urls/:shortURL', (req, res) => {
   }
   res.redirect('/urls/:shortURL');
 });
+
 
 //GET REQUESTS IN THE URL BAR USING /u/ AND A SHORT URL
 app.get('/u/:shortURL', (req, res) => {
@@ -167,6 +172,7 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${newShortURL}`);
 });
 
+
 //DELETE URL
 app.post('/urls/:shortURL/delete', (req,res) => {
   const templateVars = {
@@ -183,6 +189,7 @@ app.post('/urls/:shortURL/delete', (req,res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
+
 
 //UPDATE/EDIT URL
 app.post('/urls/:shortURL/update', (req, res) => {
@@ -201,6 +208,7 @@ app.post('/urls/:shortURL/update', (req, res) => {
   console.log('Updated URL'); //lets server-side know that a URL was updated successfully
   res.redirect('/urls');
 });
+
 
 //LOGIN PAGE
 app.get('/login', (req, res) => {
@@ -235,6 +243,7 @@ app.post('/logout', (req, res) => { //clears the corresponding user's cookie
   req.session = null;
   res.redirect('/login');
 });
+
 
 //RENDERS REGISTER PAGE
 app.get('/register', (req, res) => { //renders our register page with the header
