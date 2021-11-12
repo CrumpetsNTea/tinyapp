@@ -73,7 +73,7 @@ app.get('/urls', (req, res) => {
     userId: req.session.userID,
   };
   if (!templateVars.userId) { //if there is no userId - was getting an error if the userUrls function was inside templateVars at the top of the function defintion (cannot read .id of undefined - when there was no user logged in), so had to move it so if it passes the conditional for if a user is logged in then templateVars includes the userURLs function, if not then it doesn't and the error won't fire
-    res.redirect('/login');//401 unauthorized
+    res.send('You must be logged in to see URLs');
   }
   templateVars = { userId: req.session.userID, urls: userURLs(req.session.userID.id, urlDatabase) };
   res.render('urls_index', templateVars); //'urls_index' is the name of the template we are passing our templateVars object to
@@ -121,6 +121,10 @@ app.post('/urls/:shortURL', (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  if (shortURL in urlDatabase === false) {
+    return res.send("Short URL does not exist");
+  }
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL].longURL;
     if (longURL === undefined) {
