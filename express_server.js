@@ -106,7 +106,7 @@ app.get('/urls/:shortURL', (req, res) => {
     return res.send('Invalid Short URL').status(400); //then tells the user and they can go back and try again
   } //otherwise things go ahead as per usual - it will pass if :shortURL exists in urldatabase and will continue correctly
 
-  if (!req.session.userID.id === urlDatabase[templateVars.shortURL].userID) { //if user does not own the URL
+  if (req.session.userID.id !== urlDatabase[req.params.shortURL].userID) { //if the currently logged in userID does not equal that request shortURl's userID
     return res.send('Sorry, you do not have access to this URL').status(401);
   }
   //had to put longURL here in templateVars because it was throwing an error if it was at the top
@@ -168,7 +168,6 @@ app.post('/urls', (req, res) => {
     longURL: req.body.longURL,
     userID: req.session.userID.id,
   };
-  console.log(urlDatabase);
   res.redirect(`/urls/${newShortURL}`);
 });
 
@@ -228,12 +227,10 @@ app.post('/login', (req, res) => {
   }
   if (checkEmail(users, req.body.email)) { //if the function checkEmail returns true then that means that the email is already registered
     const userID = getUserID(users, req.body.email);
-    console.log(userID.password);
     if (!bcrypt.compareSync(req.body.password, userID.password)) { //if checkPassword fails then it means the user input the wrong password
       return res.send('Oops! Wrong Password').status(403);
     }
     req.session.userID = userID;
-    console.log(req.session.userID);
     res.redirect('/urls');
   }
 });
@@ -270,7 +267,6 @@ app.post('/register', (req, res) => {
     'email': userEmail,
     'password': bcrypt.hashSync(userPassword, 10)
   };
-  console.log(users[randomUserID]); //console.logs the database of users just so we can check that it is working properly
   req.session.userID = users[randomUserID];
   res.redirect('/urls'); //redirect the user
 });
