@@ -57,7 +57,7 @@ app.listen(PORT, () => {
 app.get('/', (req, res) => {
   const templateVars = {
     userId: req.session.userID,
-    urls: userURLs(req.session.userID.id, urlDatabase)
+    urls: userURLs(req.session.userID, urlDatabase)
   };
   if (!templateVars.userId) { //if there is no userId
     res.redirect('/login');
